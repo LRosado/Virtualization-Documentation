@@ -86,7 +86,25 @@ These steps walk through how to manually create a virtual machine and deploy an 
   # Configure Virtual Machine to Boot from DVD
   Set-VMFirmware -VMName $VMName -FirstBootDevice $DVDDrive
   ```
-  
+## Or to Create a Generation 1 Virtual Machine with Powershell
+# Set VM Name, Switch Name, and Installation Media Path.
+$VMName = 'TESTVM'
+$Switch = 'External Virtual Switch'
+$InstallMedia = 'C:\Users\Adminsitrator\Downloads\9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO'
+
+# Create New Virtual Machine
+New-VM -Name $VMName -MemoryStartupBytes 536870912 -Generation 1 -NewVHDPath "C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\$VMName\$VMName.vhdx" -NewVHDSizeBytes 42949672960 -Path "C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks\$VMName" -SwitchName $Switch
+
+# Add DVD Drive to Virtual Machine
+Add-VMScsiController -VMName $VMName
+Add-VMDvdDrive -VMName $VMName -ControllerNumber 1 -ControllerLocation 1 -Path $InstallMedia
+
+# Mount Installation Media
+$DVDDrive = Get-VMDvdDrive -VMName $VMName
+
+# Configure Virtual Machine to Boot from DVD
+Set-VMBIOS -VMName $VMName -StartupOrder @("CD","Floppy", "LegacyNetworkAdapter", "IDE")
+
 ## Complete the Operating System Deployment
 
 In order to finish building your virtual machine, you need to start the virtual machine and walk through the operating system installation.
